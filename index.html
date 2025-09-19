@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<title>Quiz sobre Thera</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #fefcea, #f1da36);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  background: white;
+  border-radius: 15px;
+  padding: 50px 40px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  max-width: 700px;
+  width: 95%;
+  text-align: center;
+}
+
+h1 { margin-bottom: 20px; font-size: 28px; }
+
+button {
+  background: #3aafa9;
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  margin: 10px 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 16px;
+}
+
+button:hover { background: #2b7a78; transform: scale(1.05); }
+
+#start-screen button:last-child { background: #f08a5d; }
+#start-screen button:last-child:hover { background: #d06e4a; }
+
+.hidden { display: none; }
+
+#options button { display: block; width: 100%; margin: 8px 0; }
+
+#navigation button:disabled { background: #ccc; cursor: default; }
+</style>
+</head>
+
+<body>
+
+<div class="container" id="start-screen">
+  <h1>🌋 Quiz sobre Thera</h1>
+  <p>Você quer começar o quiz ou aprender o conteúdo primeiro?</p>
+  <button onclick="startQuiz()">Quiz</button>
+  <button onclick="window.location.href='memoria.html'">Jogo da Memória</button>
+  <button onclick="window.location.href='forca.html'">Jogo da Forca</button><br><br><br>
+  <button onclick="window.location.href='conteudo.html'">Aprender Conteúdo</button>
+</div>
+
+<div class="container hidden" id="quiz-container">
+  <h1 id="question"></h1>
+  <p id="progress"></p>
+  <div id="options"></div>
+  <div id="navigation" style="margin-top:15px;">
+    <button id="backBtn" onclick="goBack()">Voltar</button>
+    <button id="nextBtn" onclick="goNext()">Próxima Pergunta</button>
+  </div>
+</div>
+
+<div class="container hidden" id="end-screen">
+  <h1>Fim do Quiz!</h1>
+  <p id="score"></p>
+  <button onclick="tryAgain()">Tentar de Novo</button>
+  <button onclick="goToStart()">Voltar à Tela Inicial</button>
+</div>
+
+<script>
+const questions = [
+  { question: "Qual era o principal produto da economia de Thera?", options: ["Azeitona", "Vinho", "Trigo", "Peixe"], answer: "Vinho" },
+  { question: "Qual deus era especialmente cultuado em Thera?", options: ["Zeus", "Apolo", "Poseidon", "Dionísio"], answer: "Apolo" },
+  { question: "Thera foi colonizadora de qual cidade importante no norte da África?", options: ["Cartago", "Cirene", "Alexandria", "Tiro"], answer: "Cirene" },
+  { question: "Em qual monte foi fundada a cidade de Thera?", options: ["Olimpo", "Mesa Vounó", "Parnaso", "Ida"], answer: "Mesa Vounó" },
+  { question: "Qual construção de lazer ainda pode ser vista em Thera?", options: ["Ginásio", "Templo", "Teatro", "Estádio"], answer: "Teatro" },
+  { question: "Thera participou de guerras como aliada de qual cidade-estado?", options: ["Esparta", "Atenas", "Corinto", "Delos"], answer: "Esparta" }
+];
+
+let currentQuestion = 0;
+let userAnswers = Array(questions.length).fill(null);
+
+function startQuiz() {
+  currentQuestion = 0;
+  userAnswers.fill(null);
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("end-screen").classList.add("hidden");
+  document.getElementById("quiz-container").classList.remove("hidden");
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[currentQuestion];
+  document.getElementById("question").textContent = q.question;
+  document.getElementById("progress").textContent = `Pergunta ${currentQuestion+1} / ${questions.length}`;
+  
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  q.options.forEach(option => {
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.onclick = () => selectAnswer(option);
+    if(userAnswers[currentQuestion] === option) btn.style.backgroundColor = "#2b7a78";
+    optionsDiv.appendChild(btn);
+  });
+
+  // Atualiza botões
+  const backBtn = document.getElementById("backBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  backBtn.disabled = currentQuestion === 0;
+  nextBtn.textContent = currentQuestion === questions.length-1 ? "Concluir" : "Próxima Pergunta";
+  nextBtn.disabled = userAnswers[currentQuestion] === null;
+}
+
+function selectAnswer(option) {
+  userAnswers[currentQuestion] = option;
+  showQuestion();
+}
+
+function goBack() {
+  if(currentQuestion > 0) {
+    currentQuestion--;
+    showQuestion();
+  }
+}
+
+function goNext() {
+  if(currentQuestion < questions.length-1) {
+    currentQuestion++;
+    showQuestion();
+  } else {
+    endQuiz();
+  }
+}
+
+function endQuiz() {
+  document.getElementById("quiz-container").classList.add("hidden");
+  document.getElementById("end-screen").classList.remove("hidden");
+  const score = userAnswers.filter((ans,i)=>ans===questions[i].answer).length;
+  document.getElementById("score").textContent = `Você acertou ${score} de ${questions.length} perguntas.`;
+}
+
+function tryAgain() { startQuiz(); }
+function goToStart() {
+  document.getElementById("end-screen").classList.add("hidden");
+  document.getElementById("quiz-container").classList.add("hidden");
+  document.getElementById("start-screen").classList.remove("hidden");
+}
+</script>
+</body>
+</html>

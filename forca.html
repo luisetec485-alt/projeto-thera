@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo da Forca - Thera</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to bottom, #fefcea, #f1da36);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        #game-container {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 20px;
+            padding: 30px 40px;
+            width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #2b7a78;
+            margin-bottom: 20px;
+        }
+
+        #wordDisplay {
+            font-size: 2em;
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+
+        #letters {
+            margin: 20px 0;
+        }
+
+        button.letter {
+            padding: 10px 14px;
+            margin: 5px;
+            border-radius: 6px;
+            border: none;
+            background-color: #3aafa9;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button.letter.correct {
+            background-color: #28a745; /* verde */
+        }
+
+        button.letter.wrong {
+            background-color: #d00000; /* vermelho */
+        }
+
+        button.letter:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+
+        #hint {
+            margin: 15px 0;
+            font-weight: bold;
+            color: #d00000;
+        }
+
+        #status {
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .btn-main {
+            padding: 12px 25px;
+            margin-top: 20px;
+            font-size: 1em;
+            border-radius: 10px;
+            border: none;
+            background-color: #3aafa9;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-main:hover {
+            background-color: #2b7a78;
+        }
+
+        .btn-back {
+            background-color: #3aafa9;
+        }
+
+        .btn-back:hover {
+            background-color: #2b7a78;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <h1>🎯 Jogo da Forca - Thera</h1>
+        <div id="hint">Dica: Clique em "Começar Jogo" para ver a dica!</div>
+        <div id="wordDisplay"></div>
+        <div id="letters"></div>
+        <div id="status"></div>
+        <button id="restartBtn" class="btn-main">Começar Jogo</button>
+        <button onclick="window.location.href='index.html'" class="btn-main btn-back">Voltar à Tela Inicial</button>
+    </div>
+
+    <script>
+        const words = [
+            { word: "vinho", hint: "Produto agrícola estrela da economia de Thera" },
+            { word: "mesa vounó", hint: "Monte onde Thera foi construída" },
+            { word: "teatro", hint: "Local de lazer e apresentações públicas" },
+            { word: "akrotiri", hint: "Sítio pré-helênico destruído pela grande erupção" },
+            { word: "theras", hint: "Fundador lendário de Thera" }
+        ];
+
+        let selectedWordObj;
+        let selectedWord;
+        let displayWord;
+        let wrongGuesses;
+        const maxWrong = 6;
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const lettersDiv = document.getElementById('letters');
+        const hintDiv = document.getElementById('hint');
+        const statusDiv = document.getElementById('status');
+        const restartBtn = document.getElementById('restartBtn');
+
+        function startGame() {
+            selectedWordObj = words[Math.floor(Math.random() * words.length)];
+            selectedWord = selectedWordObj.word.toLowerCase();
+            displayWord = selectedWord.replace(/[a-zA-Z]/g, "_");
+            wrongGuesses = 0;
+            wordDisplay.textContent = displayWord.split("").join(" ");
+            hintDiv.textContent = "Dica: " + selectedWordObj.hint;
+            statusDiv.textContent = `Erros: ${wrongGuesses} / ${maxWrong}`;
+            lettersDiv.innerHTML = "";
+
+            for (let i = 65; i <= 90; i++) {
+                let letter = String.fromCharCode(i);
+                let btn = document.createElement('button');
+                btn.textContent = letter;
+                btn.className = 'letter';
+                btn.onclick = () => guessLetter(letter.toLowerCase(), btn);
+                lettersDiv.appendChild(btn);
+            }
+        }
+
+        function guessLetter(letter, btn) {
+            btn.disabled = true;
+
+            if (selectedWord.includes(letter)) {
+                let newDisplay = "";
+                for (let i = 0; i < selectedWord.length; i++) {
+                    if (selectedWord[i] === letter) {
+                        newDisplay += letter;
+                    } else {
+                        newDisplay += displayWord[i];
+                    }
+                }
+                displayWord = newDisplay;
+                wordDisplay.textContent = displayWord.split("").join(" ");
+                btn.classList.add('correct');
+            } else {
+                wrongGuesses++;
+                statusDiv.textContent = `Erros: ${wrongGuesses} / ${maxWrong}`;
+                btn.classList.add('wrong');
+            }
+
+            if (displayWord === selectedWord) {
+                statusDiv.textContent = "🎉 Parabéns! Você acertou a palavra!";
+                disableAllLetters();
+            } else if (wrongGuesses >= maxWrong) {
+                statusDiv.textContent = `💀 Você perdeu! A palavra era: ${selectedWord}`;
+                wordDisplay.textContent = selectedWord.split("").join(" ");
+                disableAllLetters();
+            }
+        }
+
+        function disableAllLetters() {
+            const buttons = document.querySelectorAll('.letter');
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        restartBtn.addEventListener('click', startGame);
+    </script>
+
+</body>
+
+</html>

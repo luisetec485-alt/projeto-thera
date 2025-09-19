@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Jogo da Memória - Thera</title>
+<style>
+body {
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #fefcea, #f1da36);
+  margin: 0;
+}
+
+#game-container {
+  text-align: center;
+  background: rgba(255,255,255,0.95);
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1 {
+  color: #2b7a78;
+}
+
+#memory-board {
+  display: grid;
+  grid-template-columns: repeat(6, 80px);
+  grid-gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.card {
+  width: 80px;
+  height: 80px;
+  background-color: #3aafa9;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  transform: perspective(600px) rotateY(0deg);
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.card.flip {
+  transform: perspective(600px) rotateY(180deg);
+}
+
+.card .front,
+.card .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  color: white;
+}
+
+.card .front {
+  background-color: #3aafa9;
+}
+
+.card .back {
+  background-color: #2b7a78;
+  transform: rotateY(180deg);
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px 5px 0 5px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3aafa9;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #2b7a78;
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <h1>🧠 Jogo da Memória - Thera</h1>
+  <p>Combine os pares de símbolos da antiga Thera!</p>
+  <div id="memory-board"></div>
+  <p id="message"></p>
+  <button onclick="startGame()">Reiniciar Jogo</button>
+  <button onclick="window.location.href='index.html'">Voltar à Tela Inicial</button>
+</div>
+
+<script>
+const board = document.getElementById('memory-board');
+const message = document.getElementById('message');
+
+// símbolos agora: 12 pares
+let symbols = ["🏺","🍇","🏛️","🌋","⚓","🗡️","📜","🛡️","🏹","🐚","💎","🕯️"];
+let cards = [];
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+
+function startGame(){
+  board.innerHTML = '';
+  message.innerText = '';
+  firstCard = null;
+  secondCard = null;
+  lockBoard = false;
+
+  // duplicar os símbolos e embaralhar
+  cards = [...symbols, ...symbols];
+  cards.sort(() => 0.5 - Math.random());
+
+  cards.forEach((symbol, index) => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.dataset.symbol = symbol;
+
+    const front = document.createElement('div');
+    front.classList.add('front');
+    front.innerText = "?";
+
+    const back = document.createElement('div');
+    back.classList.add('back');
+    back.innerText = symbol;
+
+    card.appendChild(front);
+    card.appendChild(back);
+
+    card.addEventListener('click', flipCard);
+    board.appendChild(card);
+  });
+}
+
+function flipCard(){
+  if(lockBoard) return;
+  if(this === firstCard) return;
+
+  this.classList.add('flip');
+
+  if(!firstCard){
+    firstCard = this;
+    return;
+  }
+
+  secondCard = this;
+  lockBoard = true;
+
+  checkMatch();
+}
+
+function checkMatch(){
+  if(firstCard.dataset.symbol === secondCard.dataset.symbol){
+    resetCards(true);
+  } else {
+    setTimeout(() => {
+      firstCard.classList.remove('flip');
+      secondCard.classList.remove('flip');
+      resetCards(false);
+    }, 1000);
+  }
+}
+
+function resetCards(match){
+  if(match){
+    message.innerText = "✅ Par encontrado!";
+  } else {
+    message.innerText = "❌ Tente novamente!";
+  }
+
+  [firstCard, secondCard] = [null, null];
+  lockBoard = false;
+
+  // verificar se ganhou
+  if(document.querySelectorAll('.card:not(.flip)').length === 0){
+    message.innerText = "🎉 Parabéns! Você encontrou todos os pares!";
+  }
+}
+
+// iniciar o jogo ao carregar
+startGame();
+</script>
+
+</body>
+</html>
